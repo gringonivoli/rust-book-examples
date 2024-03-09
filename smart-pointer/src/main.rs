@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, rc::Rc};
 
 #[derive(Debug)]
 enum List {
@@ -6,7 +6,14 @@ enum List {
     Nil,
 }
 
+#[derive(Debug)]
+enum List2 {
+    Cons2(i32, Rc<List2>),
+    Nil2,
+}
+
 use crate::List::{Cons, Nil};
+use crate::List2::{Cons2, Nil2};
 
 struct MyBox<T>(T);
 
@@ -39,13 +46,24 @@ fn main() {
     // println!("Llegue al valor: {y}");
     // println!("Llegue al valor: {}", *y);
     // assert_eq!(5, *y);
-    let x = 5;
-    let y = MyBox::new(x);
-    assert_eq!(5, x);
-    assert_eq!(5, *y);
+    // --------------------------------------
+    // let x = 5;
+    // let y = MyBox::new(x);
+    // assert_eq!(5, x);
+    // assert_eq!(5, *y);
 
-    let m = MyBox::new(String::from("Rust"));
-    hello(&m);
+    // let m = MyBox::new(String::from("Rust"));
+    // hello(&m);
+    // --------------------------------------
+    let a = Rc::new(Cons2(5, Rc::new(Cons2(10, Rc::new(Nil2)))));
+    println!("count after creating a = {}", Rc::strong_count(&a));
+    let b = Cons2(3, Rc::clone(&a));
+    println!("count after creating b = {}", Rc::strong_count(&a));
+    {
+        let c = Cons2(4, Rc::clone(&a));
+        println!("count after creating c = {}", Rc::strong_count(&a));
+    }
+    println!("count after c goes out of scope = {}", Rc::strong_count(&a));
 }
 
 fn hello(name: &str) {
